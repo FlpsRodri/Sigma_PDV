@@ -32,6 +32,10 @@ MANIFEST
 *.manifest
 *.spec
 
+#Data Base
+*.sql
+*.db
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
