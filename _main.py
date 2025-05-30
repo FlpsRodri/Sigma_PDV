@@ -1,5 +1,7 @@
 from main_window import Window
 import os
+from Banco_de_Dados import Db
+
 
 class app:
     def __init__(self):
@@ -10,9 +12,10 @@ class app:
         
     def authenticate(self):
         try:
-            self.db_file = os.getenv('MASTER_DB_FILE')
-            self.password = os.getenv('MASTER_PASSWORD')
-            if not self.db_file or not self.password:
+            self.user = os.getenv('MASTER_USER')
+            self.key = os.getenv('MASTER_KEY')
+            
+            if not self.user or not self.key:
                 raise ValueError("Database file or password is not set in environment variables.")
         except Exception as e:
             print(f"An error occurred while authenticating: {e}")
@@ -21,7 +24,8 @@ class app:
     def master_variables(self):
         
         try:
-            self.db_file = ""
+            self.db_file = os.getenv('DB_FILE', 'database.sql')
+            self.db_table = os.getenv('DB_TABLE', 'data')
             self.user = ""
             self.password = ""
             self.main_bg= "#f0f0f0"
