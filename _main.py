@@ -4,7 +4,7 @@ from tkinter import *
 from tkinter import messagebox
 from main_config import config
 from PIL import Image, ImageTk
-
+from pdv_window import PdvWindow
 
 class Window(config):
     def __init__(self):
@@ -56,12 +56,12 @@ class Window(config):
         config_btn.config(image=self.img_config, height=64)
         fechamento_btn = button("FECHAMENTO")
         fechamento_btn.config(image=self.img_fechamento, height=64)
-        vendas_btn = button("PDV")
-        vendas_btn.config(image=self.img_pdv, height=64)
+        pdv_btn = button("PDV")
+        pdv_btn.config(image=self.img_pdv, height=64, command=lambda: PdvWindow(self.master))
         backup_btn = (button("BACKUP"))
         backup_btn.config(image=self.img_backup, height=64)
         backup_btn.config(command=self.master.quit)
-        
+    
     def image_main_upload(self):
         pass
     
@@ -75,14 +75,12 @@ class Window(config):
             self.img_frame.config(bg="orange")
         frame()
         
-        self.load_config()
+        self.load_config(master=self.master)
         self.images_load()
         self.buttons()
         self.menuBar(self.master)
-        self.master.title(self.main_title)
-        self.master.minsize(self.main_geometry['width'], self.main_geometry['height'])
-        self.master.geometry(f"{self.main_geometry['width']}x{self.main_geometry['height']}+{self.main_geometry['x']}+{self.main_geometry['y']}")  
-        self.master.config(bg=self.main_bg)
+        
+        self.master.state("zoomed")
         self.master.iconbitmap('icone.ico')
     
     def menuBar(self, master):
