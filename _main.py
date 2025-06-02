@@ -1,8 +1,10 @@
 import os
 from Banco_de_Dados import Db
 from tkinter import *
+from tkinter import messagebox
 from main_config import config
 from PIL import Image, ImageTk
+
 
 class Window(config):
     def __init__(self):
@@ -33,7 +35,7 @@ class Window(config):
             
         except Exception as e:
             print(f"Error loading image: {e}")
-            
+    
     def buttons(self):
         def button(text):
             btn = Button(self.toolbar_frame, text=text, height=2, font=self.main_font, fg=self.main_fg)
@@ -60,7 +62,7 @@ class Window(config):
         backup_btn.config(image=self.img_backup, height=64)
         backup_btn.config(command=self.master.quit)
         
-    def Labels(self):
+    def image_main_upload(self):
         pass
     
     def main_config(self):
@@ -76,20 +78,49 @@ class Window(config):
         self.load_config()
         self.images_load()
         self.buttons()
+        self.menuBar(self.master)
         self.master.title(self.main_title)
         self.master.minsize(self.main_geometry['width'], self.main_geometry['height'])
         self.master.geometry(f"{self.main_geometry['width']}x{self.main_geometry['height']}+{self.main_geometry['x']}+{self.main_geometry['y']}")  
         self.master.config(bg=self.main_bg)
-        #self.master.iconbitmap('icon.ico')
+        self.master.iconbitmap('icone.ico')
+    
+    def menuBar(self, master):
+        def sobre():
+            messagebox.showinfo("Sobre", "PDV de frente de caixa\nDesenvolvido por: FelipeRodrigues\n Contato: Felipesgs@proton.me\nVersão 1.0")
+        def instrucoes():
+            topLevel_Info = Toplevel(master)
+            topLevel_Info.title("Instruções")
+            topLevel_Info.resizable(False,False)
+            text = ("instruçoes para uso")
+            Label(topLevel_Info, text=text, font="times 12", justify=LEFT).pack(pady=10, padx=30)
+        menu_bar = Menu(master=master)
         
+        help = Menu(menu_bar, tearoff=0)
+        option = Menu(menu_bar, tearoff=0)
+        option.add_command(label="Atualizar Dados", command=self.image_main_upload)
+        option.add_separator()
+        option.add_command(label="Sair", command=master.quit)
+        help.add_command(label="Sobre", command=sobre)
+        help.add_command(label="Instruções", command=instrucoes)
+        
+        menu_bar.add_cascade(label="Opções", menu=option)
+        menu_bar.add_cascade(label="Ajuda", menu=help)
+        master.config(menu=menu_bar)
+
+    def update(self):
+        try:
+            db = Db(self.user, self.key)
+            db.update()
+            messagebox.showinfo("Atualização", "Dados atualizados com sucesso!")
+        except Exception as e:
+            messagebox.showerror("Erro", f"Erro ao atualizar dados: {e}")
 
 class app():
     def __init__(self):
         
-        
         self.authenticate()
         win = Window()
-        
         
     def authenticate(self):
         try:
