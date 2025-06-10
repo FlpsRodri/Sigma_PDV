@@ -81,8 +81,7 @@ class Window(config):
         self.menuBar(self.master)
         
         self.master.state("zoomed")
-        self.master.iconbitmap('icone.ico')
-    
+        
     def menuBar(self, master):
         def sobre():
             messagebox.showinfo("Sobre", "PDV de frente de caixa\nDesenvolvido por: FelipeRodrigues\n Contato: Felipesgs@proton.me\nVersão 1.0")
