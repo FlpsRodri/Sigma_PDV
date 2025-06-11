@@ -15,15 +15,21 @@ class PdvWindow(config):
                             {"name":"cebola", "price":"1200,5", "qnt":2, "EAN":"7891234567895"}]
         
         self.load_config(master=self.root, shurtcuts=True)
-        self.shortcuts_set()
         self.window()
+        self.shortcuts_set()
         
         self.root.mainloop()
         
     def shortcuts_set(self):
+        def enter():
+            widget = self.root.focus_get()
+            if isinstance(widget, Button):
+                widget.invoke()
         self.shortcuts.add_shortcut("F11", lambda: self.root.wm_attributes("-fullscreen", not self.root.attributes("-fullscreen")), allow_in_input=True)
         self.shortcuts.add_shortcut("F8", lambda: self.FINALIZE_FRAME.lift(), allow_in_input=True)
         self.shortcuts.add_shortcut("F9", lambda: self.PDV_FRAME.lift(), allow_in_input=True)
+        self.shortcuts.add_shortcut("i", lambda: self.btn_remove_one.focus_set(), allow_in_input=True)
+        self.shortcuts.add_shortcut("Enter", enter, allow_in_input=False)
         
     def anotations(self):
         #adiconar funcao nas configuraçoes de produtos, seja selecionavel a opção de produto comulativo ou não
@@ -53,8 +59,13 @@ class PdvWindow(config):
             self.entry_frame.pack(side=TOP, fill=BOTH, expand=True, padx=10, pady=10)
             self.entry_frame.config(bg="#d1fcf0")
         
-        def update_prod():
-            for prod in self.prod_in_list:
+        def update_prod(delete_all:bool=False):
+            if delete_all == "all":
+                self.list_prod.delete(*self.list_prod.get_children())
+                
+            for i,prod in enumerate(self.prod_in_list):
+                tag = "evenrow" if i % 2 == 0 else "oddrow"
+                
                 prod["name"] = prod["name"].capitalize()
                 prod["price"] = prod["price"].replace(",", ".")
                 prod["price"] = format(float(prod["price"]), ".2f")
@@ -62,7 +73,7 @@ class PdvWindow(config):
                 name = prod["name"]
                 qnt = self.locale.format_string("%.3f",float(prod["qnt"]), grouping=True, monetary=False)
                 price = self.locale.format_string("%.2f", float(prod["price"]), grouping=True)
-                self.list_prod.insert("", "end", values=(name, qnt, price))
+                self.list_prod.insert("", "end", values=(name, qnt, price), tags=(tag,))
         
         def remove_prod(event, amount="one"):
             
@@ -74,8 +85,9 @@ class PdvWindow(config):
                     
                     if messagebox.askyesno("Remover Produto", "Você tem certeza que deseja remover este produto?\n "+ self.prod_in_list[item_index]["name"]):
                         # Remove the item from the listbox and the product list
-                        self.list_prod.delete(selected_item)
                         del self.prod_in_list[item_index]
+                        update_prod(delete_all=True)
+                        
                 else:
                     # If no item is selected, remove the last item in the list
                     selected_item = self.list_prod.get_children()[-1]
@@ -114,6 +126,8 @@ class PdvWindow(config):
             columns = ("name", "qnt", "price")
             width_lim = {"name": 150, "qnt": 50, "price": 90}
             self.list_prod = ttk.Treeview(list_prod_frame, columns=("name", "qnt", "price"), show="headings")
+            self.list_prod.tag_configure("evenrow", background="#f0f0f0")
+            self.list_prod.tag_configure("oddrow", background="#ffffff")
             
             for col in columns:
                 self.list_prod.heading(col, text=col.capitalize())
@@ -133,8 +147,8 @@ class PdvWindow(config):
             #Buttons
             btn_list_prod_frame = LabelFrame(btns_frame, bg=self.main_bg, font=self.main_font)
             btn_list_prod_frame.pack(side=TOP, fill=BOTH, expand=True)
-            btn_remove_one = Button(btn_list_prod_frame, text="Remover Produto", command=lambda: remove_prod(None), bg="#f0e10e", font=self.main_font)   
-            btn_remove_one.pack(side=LEFT, padx=5, pady=5)
+            self.btn_remove_one = Button(btn_list_prod_frame, text="Remover Produto", command=lambda: remove_prod(None), bg="#f0e10e", font=self.main_font)   
+            self.btn_remove_one.pack(side=LEFT, padx=5, pady=5)
             btn_remove_all = Button(btn_list_prod_frame, text="Remover Todos", command=lambda: remove_prod(None, "all"), bg="#ff2424", font=self.main_font)
             btn_remove_all.pack(side=LEFT, padx=5, pady=5)
             
@@ -184,7 +198,7 @@ class PdvWindow(config):
             Label(self.entry_frame, text="Quantidade", bg=bg, font=self.main_font+" bold").grid(row=2, column=0, padx=5, pady=5, sticky=W)
             self.entry_qnt = self.entry_configured(self.entry_frame, bg="#fff3b2", font=self.main_font, width=20, filter=["numbers","decimal"], limit_amount={",":1})
             self.entry_qnt.config(justify=RIGHT)
-            self.entry_qnt.insert(0, "1,000")
+            self.entry_qnt.insert(0, "1")
             self.entry_qnt.grid(row=3, column=0, padx=5, pady=5, sticky=W)
             self.entry_code.focus_set()
 
