@@ -1,0 +1,76 @@
+{
+  "emitente": {
+    "cnpj_emitente": "07340876000126",
+    "nome_emitente": "Helilton Teixeira de Souza",
+    "nome_fantasia_emitente": "Supermercado Hely",
+    "telefone_emitente": "92933006177",
+    "logradouro_emitente": "Avenida do Pensador",
+    "numero_emitente": "587",
+    "bairro_emitente": "São Francisco",
+    "cep_emitente": "69700000",
+    "municipio_emitente": "Barcelos",
+    "uf_emitente": "AM"
+  },
+  "identificacao_nota": {
+    "data_emissao": "2025-10-11T12:00:00-04:00",
+    "valor_total": 200.00,
+    "valor_troco": 0.00,
+    "local_destino": "1",
+    "modalidade_frete": "9",
+    "presenca_comprador": "1",
+    "indicador_inscricao_estadual_destinatario": "9"
+  },
+  "destinatario": {
+    "nome_destinatario": "Consumidor não especificado"
+  },
+  "formas_pagamento": [
+    {
+      "forma_pagamento": "01",
+      "valor_pagamento": 200.00
+    }
+  ],
+  "items": [
+    {
+      "numero_item": 1,
+      "codigo_produto": "ARROZ001",
+      "descricao": "Arroz Tipo 1 Caçarola 5Kg",
+      "quantidade_comercial": 10,
+      "unidade_comercial": "UN",
+      "valor_unitario_comercial": 4.50,
+      "valor_bruto": 45.00,
+      "codigo_ncm": "10063011",
+      "cfop": "5102",
+      "icms_origem": "0",
+      "icms_situacao_tributaria": "102"
+    },
+    {
+      "numero_item": 2,
+      "codigo_produto": "FEIJAO001",
+      "descricao": "Feijão Carioca da Casa 1Kg",
+      "quantidade_comercial": 2,
+      "unidade_comercial": "UN",
+      "valor_unitario_comercial": 8.00,
+      "valor_bruto": 16.00,
+      "codigo_ncm": "07133329",
+      "cfop": "5102",
+      "icms_origem": "0",
+      "icms_situacao_tributaria": "102"
+    },
+    {
+      "numero_item": 3,
+      "codigo_produto": "PANELA001",
+      "descricao": "Panela de Pressão 4,5L",
+      "quantidade_comercial": 1,
+      "unidade_comercial": "UN",
+      "valor_unitario_comercial": 54.00,
+      "valor_bruto": 54.00,
+      "codigo_ncm": "76151000",
+      "cfop": "5102",
+      "icms_origem": "0",
+      "icms_situacao_tributaria": "102"
+    }
+  ],
+  "informacoes_adicionais": {
+    "observacoes_contribuinte": "Documento emitido em ambiente de homologação - sem valor fiscal."
+  }
+}
