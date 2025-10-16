@@ -85,6 +85,12 @@ class Db:
             values = ("".join([f"'{i}', " for i in values]))[:-2]
             columns = ("".join([f"{i}," for i in columns]))[:-1]
             if not table: table = self.table
+            #for index,column in enumerate(columns):
+            #    if len(columns) != (index + 1):
+            #        _list.append( column + ",")
+            #        
+            #    else:
+            #        _list.append( column)
                     
             self.cursor.execute(f"INSERT INTO {table} ({columns}) VALUES ({values})")
             self.bank.commit()
@@ -127,17 +133,27 @@ class Db:
 
 class start():
     
-    def __init__(self, *args, **kwargs):
-        db = Db()
-        db.createBank("Xml_DB.sql", "data", ["chave_nfe","json_data"])
+    def __init__(self):
+        #self.db = Db(bank_name="New_folder_2/Xml_DB1.sql", table="data",)
+        self.db = Db(bank_name="Xml_DB.sql", table="data", )
+        self.db.Update(table="data", columns=["chave_nfe", "json_data"], values=["2025-12-31", "Dev: Felipe rodrigues, Contato:felipesgs@proton.me"], whereID=1)
+        print(len(self.db.consultDB("data")))
+        print((self.db.consultDB("data"))[0])
+
+        #self.new_bank()
+
+
+    def new_bank(self):
+
+        self.db.createBank("Xml_DB.sql", "data", ["chave_nfe","json_data"])
         valueDic = {"dev":"Felipe Rodrigues","contato":"felipesgs@proton.me"}
         chave, xml = valueDic['dev'], valueDic
         
         #db.log(db.Insert(columns=["chave_nfe","json_data"], values=[chave, xml], table="data"))
-        db.Update(table="data", columns=["chave_nfe", "json_data"], values=[chave, xml], whereID=1)
-        data = db.consultDB("data")
-        db.log(data)
-        db.closeDB()
+        self.db.Update(table="data", columns=["chave_nfe", "json_data"], values=[chave, xml], whereID=1)
+        data = self.db.consultDB("data")
+        self.db.log(data)
+        self.db.closeDB()
         
         
 if __name__ == "__main__":
