@@ -4,7 +4,7 @@ from main_config import config
 
 class PdvWindow(config):
     def __init__(self, master=None):
-        self.root = Tk()
+        self.root = Toplevel(master) if master else Tk()
         #self.root.state("zoomed")        
         #self.root.overrideredirect(True) # Uncomment to remove title bar
         self.prod_in_list =[{"name":"arroz", "price":"9,5", "qnt":1, "EAN":"7891234567890"},
@@ -38,7 +38,8 @@ class PdvWindow(config):
         
     def window(self):
         def frames():
-            master = self.root
+            master = Frame(self.root, bg=self.main_bg, width=800, height=600)
+            master.pack()
             self.PDV_FRAME = Frame(master, bg=self.main_bg)
             self.PDV_FRAME.place(relwidth=1, relheight=1, relx=0, rely=0)
             self.FINALIZE_FRAME = Frame(master, bg=self.main_bg)
@@ -123,16 +124,16 @@ class PdvWindow(config):
             btns_frame.pack(side=RIGHT, fill=BOTH, expand=True)
 
             #create the puducts list and treeview
-            columns = ("name", "qnt", "price")
-            width_lim = {"name": 150, "qnt": 50, "price": 90}
-            self.list_prod = ttk.Treeview(list_prod_frame, columns=("name", "qnt", "price"), show="headings")
+            columns = ("Produto", "qnt", "Preço")
+            width_lim = {"Produto": 150, "qnt": 50, "Preço": 90}
+            self.list_prod = ttk.Treeview(list_prod_frame, columns=columns, show="headings")
             self.list_prod.tag_configure("evenrow", background="#f0f0f0")
             self.list_prod.tag_configure("oddrow", background="#ffffff")
             
             for col in columns:
                 self.list_prod.heading(col, text=col.capitalize())
                 self.list_prod.column(col, width=width_lim[col], minwidth=width_lim[col], stretch=False)
-                if not col == "name":
+                if not col == "Produto":
                     self.list_prod.column(col, anchor=E)
             
             # Create a scrollbar for the list
@@ -192,7 +193,7 @@ class PdvWindow(config):
             
         def entry_widgets():
             bg = "#d1fcf0"
-            Label(self.entry_frame, text="Código", bg=bg, font=self.main_font+" bold").grid(row=0, column=0, padx=5, pady=5, sticky=W)
+            Label(self.entry_frame, text="Código Gtin/EAN", bg=bg, font=self.main_font+" bold").grid(row=0, column=0, padx=5, pady=5, sticky=W)
             self.entry_code = self.entry_configured(self.entry_frame, bg="#fff3b2", font=self.main_font, width=20, filter=["numbers","decimal"])
             self.entry_code.grid(row=1, column=0, padx=5, pady=5, sticky=W)
             Label(self.entry_frame, text="Quantidade", bg=bg, font=self.main_font+" bold").grid(row=2, column=0, padx=5, pady=5, sticky=W)
@@ -202,7 +203,6 @@ class PdvWindow(config):
             self.entry_qnt.grid(row=3, column=0, padx=5, pady=5, sticky=W)
             self.entry_code.focus_set()
 
-        
         #main variables
         
         self.last_prod_name = StringVar(value=self.prod_in_list[-1]["name"].upper() if self.prod_in_list else " ")
