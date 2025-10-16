@@ -4,7 +4,6 @@ import unicodedata
 from tkinter import ttk,messagebox
 from datetime import datetime, date, timedelta
 import pyperclip
-import keyboard
 import json
 from xmlToSql import XmlToDatabase
 from Banco_de_Dados import Db
@@ -21,27 +20,19 @@ class relogio(object):
             self.time.place(relx=timex, rely=timey)
         if date:
             self.date = Label(master,  font=font, bg=bg, fg=fg)
-            self.date.place(relx=datex,rely=datey)    
+            self.date.place(relx=datex,rely=datey)
         self.relogio(time=time,date=date)
     
     def relogio(self,time=False,date=False):
-        self.tempo = datetime.now()
+        tempo = datetime.now()
         if time:
-            
-            hora = self.tempo.strftime("%H:%M:%S")
+            hora = tempo.strftime("%H:%M:%S")
             self.time.config(text=hora)
-            self.time.after(500, lambda:self.relogio(time=True))
-            
         if date:
-            self.get_time()
-    
-    def get_time(self):
-        dia = self.tempo.day
-        mes = (f"0{str(self.tempo.month)}" if self.tempo.month < 10 else str(self.tempo.month))
-        ano = self.tempo.strftime("%Y")
-        self.date.config(text=f" {str(dia)}/{str(mes)}/{ano}")
-        if not self.time:
-            self.date.after(500, lambda:self.relogio(date=True))
+            data_formatada = tempo.strftime("%d/%m/%Y")
+            self.date.config(text=f" {data_formatada}")
+        
+        self.root.after(500, lambda: self.relogio(time=time, date=date))
             
             
 class Table(object):
@@ -59,15 +50,15 @@ class Table(object):
             table_Frame.config(width=self.width, height=self.height)
             geometry.after(500, set_table_geometry)
         
-        geometry = Label(master, text="", bg=self.main_bg)
-        geometry.grid(column=6, row=0)
-        
         entry_values_frame = LabelFrame(master, text="Entrada de Busca", bg=self.main_bg, fg=self.main_fg, font=self.main_font, width=600, height=150)
         entry_values_frame.grid(row=0, column=0,padx=20, sticky="w")
         info_add_frame = LabelFrame(master, text="Informações Adicionais", bg=self.main_bg, fg=self.main_fg, font=self.main_font)
         info_add_frame.grid(row=0, column=1, sticky="w")
         table_Frame = LabelFrame(master, text="Tabela de Produtos", bg=self.main_bg, fg=self.main_fg, font=self.main_font, width=2300, height=500)
         table_Frame.grid(row=1, column=0, columnspan=3, padx=20,sticky="w")
+        
+        geometry = Label(master, text="", bg=self.main_bg) # Usado para o after
+        
         set_table_geometry()
         
         Style = ttk.Style()
@@ -225,11 +216,6 @@ class Table(object):
         #fatFrame = LabelFrame(nfe_master, text="Fatura ",width=260, height=80, bg=self.main_bg, bd=1)
         #fatFrame.place(rely=0.17,relx=0.1, width=640, height=122)
     
-    def Frmt(self, num):
-        num = float(num)
-        return format(num,".2f")
-        
-        
 class app(Table,relogio):
     
     def __init__(self):
@@ -252,6 +238,16 @@ class app(Table,relogio):
         self.window_search_nfe(master=aba2)
         self.run_clock(master=aba1,time=(True,0.8,0.96),date=(True,0.85,0.96), bg=self.main_bg, font="times 12 bold")
         self.hotkeys()
+
+        def on_tab_changed(event):
+            selected_tab = event.widget.select()
+            tab_text = event.widget.tab(selected_tab, "text")
+            if tab_text == "Buscar Produtos":
+                self.prodDescription.focus_set()
+            else:
+                self.entry_Nnf.focus_set()
+
+        nb.bind("<<NotebookTabChanged>>", on_tab_changed)
 
 
         load_thread = threading.Thread(target=self._load_data_background, daemon=True)
@@ -406,10 +402,10 @@ class app(Table,relogio):
 
     def hotkeys(self):
         def F11():
-            self.screenSet = False if self.screenSet == True else True
+            self.screenSet = not self.screenSet
             self.root.attributes("-fullscreen",self.screenSet)
         self.screenSet = False
-        keyboard.add_hotkey("F11",F11)
+        self.root.bind("<F11>", lambda event: F11())
 
     def config_window(self,master):
         root = Toplevel(master)
@@ -571,7 +567,7 @@ class app(Table,relogio):
         self.tabela.delete(*self.tabela.get_children())
         self.count,self.max,self.min = 0,0,0
         def calc_info(value):
-            value = float(self.Frmt(value))
+            value = float(value)
             self.count +=1
             self.max = value if value > self.max else self.max
             if self.min == 0: self.min = value
