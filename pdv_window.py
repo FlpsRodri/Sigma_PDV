@@ -28,6 +28,7 @@ class PdvWindow(config):
         self.shortcuts.add_shortcut("F11", lambda: self.root.wm_attributes("-fullscreen", not self.root.attributes("-fullscreen")), allow_in_input=True)
         self.shortcuts.add_shortcut("F8", lambda: self.FINALIZE_FRAME.lift(), allow_in_input=True)
         self.shortcuts.add_shortcut("F9", lambda: self.PDV_FRAME.lift(), allow_in_input=True)
+        self.shortcuts.add_shortcut("esc", lambda: self.PDV_FRAME.lift(), allow_in_input=True)
         self.shortcuts.add_shortcut("i", lambda: self.btn_remove_one.focus_set(), allow_in_input=True)
         self.shortcuts.add_shortcut("Enter", enter, allow_in_input=False)
         
@@ -162,6 +163,7 @@ class PdvWindow(config):
             
         def preview_widgets():
             def update():
+                
                 if not self.prod_in_list:
                     self.last_prod_name.set(" ")
                     self.prod_name_view.config(text="")
@@ -173,8 +175,10 @@ class PdvWindow(config):
                 #self.last_prod_name.set(self.prod_in_list[-1]["name"].capitalize() if self.prod_in_list else " ")
                 self.prod_name_view.config(text=self.last_prod_name.get().upper())
                 last_prod_amount_value.set(value=f"{format(float(self.prod_in_list[-1]['qnt']), ".3f")} X R$ {self.locale.format_string('%.2f', float(self.prod_in_list[-1]['price'].replace(",", ".")), grouping=True)}")
-                self.prod_name_view.after(100, update)
                 
+            def teste():
+                print("teste")
+            
             bg = "#ffffff"
             font = "hevetica 14 bold"
             font_lgnd = "hevetica 12"
@@ -191,6 +195,8 @@ class PdvWindow(config):
             last_prod_amount.grid(row=4, column=0, padx=5, pady=5, sticky=W)
             update()
             
+        
+        
         def entry_widgets():
             bg = "#d1fcf0"
             Label(self.entry_frame, text="Código Gtin/EAN", bg=bg, font=self.main_font+" bold").grid(row=0, column=0, padx=5, pady=5, sticky=W)

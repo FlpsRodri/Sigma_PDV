@@ -5,6 +5,7 @@ from tkinter import messagebox
 from main_config import config
 from PIL import Image, ImageTk
 from pdv_window import PdvWindow
+import XML_Read
 
 class Window(config):
     def __init__(self):
@@ -46,8 +47,8 @@ class Window(config):
         clients_btn.config(image=self.img_clientes, height=64)
         payments_btn = button("PAGAMENTOS")
         payments_btn.config(image=self.img_payments, height=64)
-        products_btn = button("PRODUTOS")
-        products_btn.config(image=self.img_products, height=64)
+        estoq_btn = button("ESTOQUE")
+        estoq_btn.config(image=self.img_products, height=64, command=lambda: XML_Read.XML_READ())
         moviment_btn = button("MOVIMENTAÇÕES")
         moviment_btn.config(image=self.img_moviment, height=64)
         consult_vendas_btn = button("CONSULTA VENDAS")

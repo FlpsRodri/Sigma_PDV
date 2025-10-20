@@ -81,7 +81,8 @@ class Table(object):
             Label(info_add_frame, text="Items: ", font=self.main_font,bg=self.main_bg,fg=self.main_fg).grid(row=0, column=0, sticky="nsew")
             Label(info_add_frame, text="Maior Valor: ", font=self.main_font,bg=self.main_bg,fg=self.main_fg).grid(row=1, column=0, sticky="nsew")
             Label(info_add_frame, text="Menor Valor: ", font=self.main_font,bg=self.main_bg,fg=self.main_fg).grid(row=2, column=0, sticky="nsew")
-            Label(info_add_frame, text="Res. p/ Busca", font=self.main_font, width=8,anchor=W, bg="white",fg=self.main_fg).grid(row=3, column=0, sticky="nsew")
+            Label(info_add_frame, text="Notas Registradas:", font=self.main_font,bg=self.main_bg,fg=self.main_fg).grid(row=3, column=0, sticky="nsew")
+            Label(info_add_frame, text="Res. p/ Busca", font=self.main_font, width=8,anchor=W, bg="white",fg=self.main_fg).grid(row=4, column=0, sticky="nsew")
             
             self.value_items = Label(info_add_frame, text="0", font=self.main_font,bg=self.main_bg,fg=self.main_fg)
             self.value_items.grid(row=0, column=1, sticky="nsew")
@@ -89,6 +90,8 @@ class Table(object):
             self.value_MaxValue.grid(row=1, column=1, sticky="nsew")
             self.value_MinValue = Label(info_add_frame, text="0,00", font=self.main_font,bg=self.main_bg,fg=self.main_fg) 
             self.value_MinValue.grid(row=2, column=1, sticky="nsew")
+            self.total_notes = Label(info_add_frame, text=self.tt_notes, font=self.main_font,bg=self.main_bg,fg=self.main_fg) 
+            self.total_notes.grid(row=3, column=1, sticky="nsew")
             
         def entrys():
             
@@ -115,7 +118,7 @@ class Table(object):
             self.prodDescription.grid(row=1, column=0, sticky="nsew")
             self.entry_keynfe.grid(row=4, column=0,columnspan=2, sticky="nsew")
             self.entry_nnfe.grid(row=1, column=1, padx=5)
-            self.entry_lim_result.grid(row=3, column=1, sticky="nsew")
+            self.entry_lim_result.grid(row=4, column=1, sticky="nsew")
             
             
         def table():
@@ -216,7 +219,7 @@ class Table(object):
         #fatFrame = LabelFrame(nfe_master, text="Fatura ",width=260, height=80, bg=self.main_bg, bd=1)
         #fatFrame.place(rely=0.17,relx=0.1, width=640, height=122)
     
-class app(Table,relogio):
+class XML_READ(Table,relogio):
     
     def __init__(self):
 
@@ -398,6 +401,7 @@ class app(Table,relogio):
         self.log("Carregando dados...")
         self.data_master = self.db.consultDB()
         self.data_master = self.data_master[1:]
+        self.tt_notes = str(len(self.data_master))
         self.log("Dados carregados com sucesso!")
 
     def hotkeys(self):
@@ -564,6 +568,7 @@ class app(Table,relogio):
         self.value_items["text"] = "0"
         self.value_MaxValue["text"] = "0,00"
         self.value_MinValue ["text"] = "0,00"
+        self.total_notes["text"] = self.tt_notes
         self.tabela.delete(*self.tabela.get_children())
         self.count,self.max,self.min = 0,0,0
         def calc_info(value):
@@ -645,7 +650,7 @@ class app(Table,relogio):
                         
             insertOnTable()
             
-        self.value_items["text"], self.value_MaxValue["text"], self.value_MinValue ["text"] = self.count, self.max, self.min
+        self.value_items["text"], self.value_MaxValue["text"], self.value_MinValue ["text"], self.total_notes["text"] = self.count, self.max, self.min, self.tt_notes
                     
     def searcheNFe(self,key_nfe):
         try: self.tabela.delete(*self.tabela.get_children())
@@ -707,4 +712,4 @@ class app(Table,relogio):
                 self.InsertOnTable2(keyAgr=value,key=key)
     
 if __name__ == "__main__":
-    run=app()   
+    run=XML_READ()   
