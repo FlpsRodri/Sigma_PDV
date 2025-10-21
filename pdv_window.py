@@ -32,11 +32,6 @@ class PdvWindow(config):
         self.shortcuts.add_shortcut("i", lambda: self.btn_remove_one.focus_set(), allow_in_input=True)
         self.shortcuts.add_shortcut("Enter", enter, allow_in_input=False)
         
-    def anotations(self):
-        #adiconar funcao nas configuraçoes de produtos, seja selecionavel a opção de produto comulativo ou não
-        #adicionar opção de pagamento, se é dinheiro ou cartão
-        pass
-        
     def window(self):
         def frames():
             master = Frame(self.root, bg=self.main_bg, width=800, height=600)
@@ -61,10 +56,10 @@ class PdvWindow(config):
             self.entry_frame.pack(side=TOP, fill=BOTH, expand=True, padx=10, pady=10)
             self.entry_frame.config(bg="#d1fcf0")
         
-        def update_prod(delete_all:bool=False):
-            if delete_all == "all":
+        def update_prod(delete_all:bool=True):
+            if delete_all:
                 self.list_prod.delete(*self.list_prod.get_children())
-                
+            
             for i,prod in enumerate(self.prod_in_list):
                 tag = "evenrow" if i % 2 == 0 else "oddrow"
                 
@@ -76,7 +71,8 @@ class PdvWindow(config):
                 qnt = self.locale.format_string("%.3f",float(prod["qnt"]), grouping=True, monetary=False)
                 price = self.locale.format_string("%.2f", float(prod["price"]), grouping=True)
                 self.list_prod.insert("", "end", values=(name, qnt, price), tags=(tag,))
-        
+                preview_widgets()
+            
         def remove_prod(event, amount="one"):
             
             if amount == "one":
@@ -88,7 +84,7 @@ class PdvWindow(config):
                     if messagebox.askyesno("Remover Produto", "Você tem certeza que deseja remover este produto?\n "+ self.prod_in_list[item_index]["name"]):
                         # Remove the item from the listbox and the product list
                         del self.prod_in_list[item_index]
-                        update_prod(delete_all=True)
+                        update_prod()
                         
                 else:
                     # If no item is selected, remove the last item in the list
@@ -97,26 +93,38 @@ class PdvWindow(config):
                     if messagebox.askyesno("Remover Produto", "Você tem certeza que deseja remover este produto?\n "+ self.prod_in_list[item_index]["name"]):
                         self.list_prod.delete(selected_item)
                         del self.prod_in_list[item_index]
+                        update_prod()
                 
             elif amount == "all":
                 if messagebox.askyesno("Remover Todos os Produtos", "Você tem certeza que deseja remover todos os produtos?"):
                     self.list_prod.delete(*self.list_prod.get_children())
                     self.prod_in_list.clear()
+                    update_prod()
                     
         def alter_amount(event):
             selected_item = self.list_prod.selection()
             if selected_item:
                 item_index = self.list_prod.index(selected_item)
                 self.last_prod_name.set(value=self.prod_in_list[item_index]["name"])
-                new_amount = simpledialog.askfloat("Alterar Quantidade", f"Digite a nova quantidade para {self.last_prod_name.get()}:", 
-                                                   initialvalue=self.prod_in_list[item_index]["qnt"], parent=self.root)
-                if new_amount is not None:
-                    self.prod_in_list[item_index]["qnt"] = new_amount
-                    self.list_prod.item(selected_item, values=(self.last_prod_name.get(), format(new_amount, ".3f").replace(".", ","), 
-                                                                self.prod_in_list[item_index]["price"]))
+                initial_value_str = str(self.prod_in_list[item_index]["qnt"]).replace('.', ',')
+                new_amount_str = simpledialog.askstring("Alterar Quantidade", 
+                                                        f"Digite a nova quantidade para {self.last_prod_name.get()}:", 
+                                                        initialvalue=initial_value_str, parent=self.root)
+                
+                new_amount = None
+                if new_amount_str is not None:
+                    try:
+                        # Substitua a vírgula por ponto antes de converter para float
+                        new_amount = float(new_amount_str.replace(',', '.'))
+                        self.prod_in_list[item_index]["qnt"] = new_amount
+                        self.list_prod.item(selected_item, values=(self.last_prod_name.get(), format(new_amount, ".3f").replace(".", ","), 
+                                                                    self.prod_in_list[item_index]["price"]))
+                    except ValueError:
+                        messagebox.showerror("Erro de Entrada", "Quantidade inválida. Por favor, digite um número válido.")
             else:
                 messagebox.showwarning("Nenhum Produto Selecionado", "Por favor, selecione um produto para alterar a quantidade.")
-                    
+            update_prod()
+                   
         def itens_widgets():
             # Create the frames
             list_prod_frame = LabelFrame(self.itens_frame, text="Produtos", bg=self.main_bg, font=self.main_font, width=400, height=500)
@@ -187,7 +195,7 @@ class PdvWindow(config):
             Label(self.preview_frame, text="Total", bg=bg, font=font_lgnd, width=wd, anchor=W).grid(row=0, column=0, padx=5, pady=5, sticky=W)
             self.value_total_view = Label(self.preview_frame, text="", textvariable=self.value_total, bg=bg, font=font.replace("14","22"), bd=1, relief=SOLID, width=wd)
             self.value_total_view.grid(row=1, column=0, padx=5, pady=5, sticky=W+E, columnspan=2)
-            Label(self.preview_frame, text="Ultimo Item", bg=bg, font=font_lgnd, width=wd, anchor=W).grid(row=2, column=0, padx=5, pady=5, sticky=W)
+            Label(self.preview_frame, text="Ultima Alteração", bg=bg, font=font_lgnd, width=wd, anchor=W).grid(row=2, column=0, padx=5, pady=5, sticky=W)
             self.prod_name_view = Label(self.preview_frame, text="", bg=bg, font=font, textvariable=self.last_prod_name, width=wd)
             self.prod_name_view.grid(row=3, column=0, padx=5, pady=5, sticky=W+E, columnspan=2)
             last_prod_amount_value = StringVar(value="0,000")
@@ -195,8 +203,6 @@ class PdvWindow(config):
             last_prod_amount.grid(row=4, column=0, padx=5, pady=5, sticky=W)
             update()
             
-        
-        
         def entry_widgets():
             bg = "#d1fcf0"
             Label(self.entry_frame, text="Código Gtin/EAN", bg=bg, font=self.main_font+" bold").grid(row=0, column=0, padx=5, pady=5, sticky=W)
@@ -208,8 +214,6 @@ class PdvWindow(config):
             self.entry_qnt.insert(0, "1")
             self.entry_qnt.grid(row=3, column=0, padx=5, pady=5, sticky=W)
             self.entry_code.focus_set()
-
-        #main variables
         
         self.last_prod_name = StringVar(value=self.prod_in_list[-1]["name"].upper() if self.prod_in_list else " ")
         
