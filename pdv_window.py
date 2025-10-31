@@ -7,12 +7,12 @@ class PdvWindow(config):
         self.root = Toplevel(master) if master else Tk()
         #self.root.state("zoomed")        
         #self.root.overrideredirect(True) # Uncomment to remove title bar
-        self.prod_in_list =[{"name":"arroz", "price":"9,5", "qnt":1, "EAN":"7891234567890"},
-                            {"name":"feijão preto", "price":"8,0", "qnt":1, "EAN":"7891234567891"},
-                            {"name":"batata", "price":"3,0", "qnt":2, "EAN":"7891234567892"},
-                            {"name":"tomate", "price":"5,0", "qnt":1.5, "EAN":"7891234567893"},
-                            {"name":"cenoura", "price":"2,0", "qnt":3, "EAN":"7891234567894"},
-                            {"name":"cebola", "price":"1200,5", "qnt":2, "EAN":"7891234567895"}]
+        self.prod_in_list =[{"name":"arroz", "price":"9,5", "qnt":1, "EAN":"7891234567890", "value":"9,5"},
+                            {"name":"feijão preto", "price":"8,0", "qnt":1, "EAN":"7891234567891", "value":"8,0"},
+                            {"name":"batata", "price":"3,0", "qnt":2, "EAN":"7891234567892","value":"6,0"},
+                            {"name":"tomate", "price":"5,0", "qnt":1.5, "EAN":"7891234567893", "value":"7,5"},
+                            {"name":"cenoura", "price":"2,0", "qnt":3, "EAN":"7891234567894", "value":"6,0"},
+                            {"name":"cebola", "price":"1200,5", "qnt":2, "EAN":"7891234567895", "value":"1401,0"}]
         
         self.load_config(master=self.root, shurtcuts=True)
         self.window()
@@ -31,6 +31,7 @@ class PdvWindow(config):
         self.shortcuts.add_shortcut("esc", lambda: self.PDV_FRAME.lift(), allow_in_input=True)
         self.shortcuts.add_shortcut("i", lambda: self.btn_remove_one.focus_set(), allow_in_input=True)
         self.shortcuts.add_shortcut("Enter", enter, allow_in_input=False)
+        self.shortcuts.add_shortcut("0", lambda: self.entry_code.focus_set(), allow_in_input=False)
         
     def window(self):
         def frames():
@@ -41,14 +42,14 @@ class PdvWindow(config):
             self.FINALIZE_FRAME = Frame(master, bg=self.main_bg)
             self.FINALIZE_FRAME.place(relwidth=1, relheight=1, relx=0, rely=0)
             self.PDV_FRAME.lift()
-            right_frame = Frame(self.PDV_FRAME, bg=self.main_bg, width=200)
+            right_frame = Frame(self.PDV_FRAME, bg=self.main_bg, width=100)
             right_frame.pack(side=RIGHT, fill=Y, padx=10, pady=10)
             right_frame.config(bg=self.main_bg)
             
             self.itens_frame = Frame(self.PDV_FRAME, bg=master.cget("bg"))
             self.itens_frame.pack(side=LEFT, fill=BOTH, expand=True, padx=10, pady=10)
             
-            self.preview_frame = LabelFrame(right_frame, bg=self.main_bg, width=400, height=300)
+            self.preview_frame = LabelFrame(right_frame, bg=self.main_bg, width=200, height=300)
             self.preview_frame.pack(side=TOP, fill=BOTH, expand=True, padx=10, pady=10)
             self.preview_frame.config(bg="#ffffff")
             
@@ -70,8 +71,9 @@ class PdvWindow(config):
                 name = prod["name"]
                 qnt = self.locale.format_string("%.3f",float(prod["qnt"]), grouping=True, monetary=False)
                 price = self.locale.format_string("%.2f", float(prod["price"]), grouping=True)
-                self.list_prod.insert("", "end", values=(name, qnt, price), tags=(tag,))
-                preview_widgets()
+                value = self.locale.format_string("%.2f", float(prod["value"].replace(",",".")), grouping=True)
+                self.list_prod.insert("", "end", values=(name, f"{qnt}X{price}", value), tags=(tag,))
+            preview_widgets()
             
         def remove_prod(event, amount="one"):
             
@@ -97,7 +99,7 @@ class PdvWindow(config):
                 
             elif amount == "all":
                 if messagebox.askyesno("Remover Todos os Produtos", "Você tem certeza que deseja remover todos os produtos?"):
-                    self.list_prod.delete(*self.list_prod.get_children())
+                    #self.list_prod.delete(*self.list_prod.get_children())
                     self.prod_in_list.clear()
                     update_prod()
                     
@@ -116,7 +118,7 @@ class PdvWindow(config):
                     try:
                         # Substitua a vírgula por ponto antes de converter para float
                         new_amount = float(new_amount_str.replace(',', '.'))
-                        self.prod_in_list[item_index]["qnt"] = new_amount
+                        self.prod_in_list[item_index]["qnt"], self.prod_in_list[item_index]["value"] = new_amount, format(float(self.prod_in_list[item_index]["price"].replace(",", ".")) * new_amount, ".2f").replace(".", ",")
                         self.list_prod.item(selected_item, values=(self.last_prod_name.get(), format(new_amount, ".3f").replace(".", ","), 
                                                                     self.prod_in_list[item_index]["price"]))
                     except ValueError:
@@ -127,14 +129,14 @@ class PdvWindow(config):
                    
         def itens_widgets():
             # Create the frames
-            list_prod_frame = LabelFrame(self.itens_frame, text="Produtos", bg=self.main_bg, font=self.main_font, width=400, height=500)
+            list_prod_frame = LabelFrame(self.itens_frame, text="Produtos", bg=self.main_bg, font=self.main_font, width=600, height=500)
             list_prod_frame.pack(side=TOP, fill=BOTH, expand=True)
             btns_frame = LabelFrame(self.itens_frame, bg=self.main_bg, height=100, font=self.main_font)
             btns_frame.pack(side=RIGHT, fill=BOTH, expand=True)
 
             #create the puducts list and treeview
-            columns = ("Produto", "qnt", "Preço")
-            width_lim = {"Produto": 150, "qnt": 50, "Preço": 90}
+            columns = ("Produto", "Qnt / Preço", "Total")
+            width_lim = {"Produto": 150, "Qnt / Preço": 100, "Total": 90}
             self.list_prod = ttk.Treeview(list_prod_frame, columns=columns, show="headings")
             self.list_prod.tag_configure("evenrow", background="#f0f0f0")
             self.list_prod.tag_configure("oddrow", background="#ffffff")
@@ -157,7 +159,7 @@ class PdvWindow(config):
             #Buttons
             btn_list_prod_frame = LabelFrame(btns_frame, bg=self.main_bg, font=self.main_font)
             btn_list_prod_frame.pack(side=TOP, fill=BOTH, expand=True)
-            self.btn_remove_one = Button(btn_list_prod_frame, text="Remover Produto", command=lambda: remove_prod(None), bg="#f0e10e", font=self.main_font)   
+            self.btn_remove_one = Button(btn_list_prod_frame, text="Remover Produto( i )", command=lambda: remove_prod(None), bg="#f0e10e", font=self.main_font)   
             self.btn_remove_one.pack(side=LEFT, padx=5, pady=5)
             btn_remove_all = Button(btn_list_prod_frame, text="Remover Todos", command=lambda: remove_prod(None, "all"), bg="#ff2424", font=self.main_font)
             btn_remove_all.pack(side=LEFT, padx=5, pady=5)
@@ -173,19 +175,19 @@ class PdvWindow(config):
             def update():
                 
                 if not self.prod_in_list:
-                    self.last_prod_name.set(" ")
+                    
+                    self.last_prod_name.set("---")
                     self.prod_name_view.config(text="")
                     self.value_total_view.config(text="R$ 0,00")
                     return
+                
+                
                 value_total_sum = sum(float(value["price"].replace(",", ".")) * float(value["qnt"]) for value in self.prod_in_list)
                 value_total_sum = self.locale.format_string("%.2f", value_total_sum, grouping=True)
                 self.value_total.set(value = f"R$ {value_total_sum}")
                 #self.last_prod_name.set(self.prod_in_list[-1]["name"].capitalize() if self.prod_in_list else " ")
                 self.prod_name_view.config(text=self.last_prod_name.get().upper())
                 last_prod_amount_value.set(value=f"{format(float(self.prod_in_list[-1]['qnt']), ".3f")} X R$ {self.locale.format_string('%.2f', float(self.prod_in_list[-1]['price'].replace(",", ".")), grouping=True)}")
-                
-            def teste():
-                print("teste")
             
             bg = "#ffffff"
             font = "hevetica 14 bold"
@@ -214,8 +216,12 @@ class PdvWindow(config):
             self.entry_qnt.insert(0, "1")
             self.entry_qnt.grid(row=3, column=0, padx=5, pady=5, sticky=W)
             self.entry_code.focus_set()
-        
+            
+            
+            Label(self.entry_frame, text=f"Depósito: {self.deposit}", bg="#d1fcf0", font=self.main_font+" bold", width=20, bd=1, relief=SOLID).grid(row=4, column=0, padx=5, pady=10, sticky=W)
+            
         self.last_prod_name = StringVar(value=self.prod_in_list[-1]["name"].upper() if self.prod_in_list else " ")
+        
         
         frames()
         itens_widgets()

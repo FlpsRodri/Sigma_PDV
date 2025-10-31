@@ -260,6 +260,7 @@ class XML_READ(Table,relogio):
 
     def validate_check(self):
         vld = self.db.consultDB()[0][1].split("-")
+        print(vld)
         for id,i in enumerate(vld): vld[id] = int(vld[id])
 
         valid = date(vld[0], vld[1], vld[2])
@@ -334,7 +335,7 @@ class XML_READ(Table,relogio):
             self.root.after(0, self._enable_widgets) # Usa after para garantir que seja executado na thread principal da GUI
         except Exception as e:
             messagebox.showerror("Erro", "Erro ao carregar dados em background. \n" + str(e))
-            self.log(("Erro ao carregar dados em background: "+ e))
+            self.log(("Erro ao carregar dados em background: "+ str(e)))
             # Talvez mostrar um erro para o usuário
     
     def _enable_widgets(self):
@@ -350,6 +351,7 @@ class XML_READ(Table,relogio):
         messagebox.showinfo("Concluido", "Dados atualizados com sucesso!")
         
     def update_values(self):
+        self.log("Updating values...")
         
         def get_prod(prod_dict:dict):
             cEAN = prod_dict['cEAN']['text'] if 'cEAN' in prod_dict.keys() else "Sem Gtin"
@@ -363,7 +365,7 @@ class XML_READ(Table,relogio):
                     'NCM':prod_dict['NCM']['text'] if "NCM" in prod_dict.keys() else "Sem NCM",
                     'nNF':self.list_nfe[-1]['nNFe'], 'cNF':self.list_nfe[-1]['cNFe']}
             return prod
-
+        
         for ind, nNf, data in self.data_master:
             if nNf in self.chave_list: continue
             nfe={}
@@ -390,6 +392,7 @@ class XML_READ(Table,relogio):
                 self.produtos.append(get_prod(det['prod']))
         self.list_nfe.sort(key=lambda x: datetime.strptime(x['dhEmi'],'%d-%m-%Y'), reverse=True)
         self.filter_combobox_emitent(None)
+        print("Values Updated")
         return True
     
     def DataBase(self):
@@ -399,8 +402,7 @@ class XML_READ(Table,relogio):
         self.log("Conectando ao banco de dados...")
         self.db = Db(bank_name="Xml_DB.sql", table="data")
         self.log("Carregando dados...")
-        self.data_master = self.db.consultDB()
-        self.data_master = self.data_master[1:]
+        self.data_master = self.db.consultDB()[1:]
         self.tt_notes = str(len(self.data_master))
         self.log("Dados carregados com sucesso!")
 

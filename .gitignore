@@ -35,6 +35,7 @@ MANIFEST
 #Data Base
 *.sql
 *.db
+*.xml
 
 #Logs
 Log/

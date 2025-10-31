@@ -16,6 +16,8 @@ class config(object):
         self.main_geometry = {'width': 800, 'height': 600, 'x': 100, 'y': 100}
         self.locale = locale
         
+        self.deposit = "PRINCIPAL"
+        
         if master:
             master.config(bg=self.main_bg)
             master.title(self.main_title)
